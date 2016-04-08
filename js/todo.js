@@ -29,7 +29,16 @@
 
     var id = tasks.length;
 
-    var initTask = function initTask(tasks) {
+    function Todo() {
+        var self = this;
+
+        this.todoFilter();
+        this.initTask(tasks);
+        this.createTask();
+
+    }
+
+    Todo.prototype.initTask = function initTask(tasks) {
         var todoList =  doc.querySelector("#todo-list");
         todoList.innerHTML = "";
 
@@ -57,39 +66,38 @@
             //console.log(task.completed);
         });
 
-        addToggleTaskEvent();
+        this.addToggleTaskEvent();
     };
 
-    var addToggleTaskEvent = function addToggleTaskEvent() {
-        var taskButton = doc.querySelectorAll(".task-button");
+    Todo.prototype.addToggleTaskEvent = function addToggleTaskEvent() {
+        var taskButton = doc.querySelectorAll(".task-button"),
+            self = this;
 
-        for(i = 0; i<taskButton.length; i++) {
-            taskButton[i].addEventListener('click', toggleTask);
+        for(var i = 0, taskBtnLen = taskButton.length; i<taskBtnLen; i++) {
+            taskButton[i].addEventListener('click', function () {
+                //console.log(this);
+                var taskId = parseInt(this.parentNode.getAttribute('data-id'));
+                //console.log(taskId);
+
+                var newTask = self.findTask(taskId);
+
+                //console.log(newTask);
+
+                tasks.forEach(function (task) {
+                    if(task.id === newTask.id) {
+                        newTask.completed = !newTask.completed;
+                    }
+                });
+
+
+                self.initTask(tasks);
+
+                console.log(tasks);
+            });
         }
     };
 
-    var toggleTask = function toggleTask() {
-        //console.log(this);
-        var taskId = parseInt(this.parentNode.getAttribute('data-id'));
-        //console.log(taskId);
-
-        var newTask = findTask(taskId);
-
-        console.log(newTask);
-
-        tasks.forEach(function (task) {
-            if(task.id === newTask.id) {
-                newTask.completed = !newTask.completed;
-            }
-        });
-
-
-        initTask(tasks);
-
-        console.log(tasks);
-    };
-
-    var findTask = function findTask(taskId) {
+    Todo.prototype.findTask = function findTask(taskId) {
         var singleTask = {};
 
         tasks.some(function(task) {
@@ -98,19 +106,23 @@
         });
 
         return singleTask;
-    }
+    };
 
-    var todoFilter = function todoFilter() {
-        var todoFilters = doc.querySelectorAll("#todo-controls li");
+    Todo.prototype.todoFilter = function todoFilter() {
+        var todoFilters = doc.querySelectorAll("#todo-controls li"),
+            self = this;
 
-        for(i=0; i<todoFilters.length; i++) {
-            todoFilters[i].addEventListener('click', filterTasks);
+        for(var i=0; i<todoFilters.length; i++) {
+            todoFilters[i].addEventListener('click', function() {
+                self.filterTasks(self, this);
+            });
         }
     };
 
-    var filterTasks = function filterTasks() {
-        //console.log(this);
-        var filterBy = this.getAttribute("data-filter");
+    Todo.prototype.filterTasks = function filterTasks(self, dom) {
+        console.log(self);
+        console.log(dom);
+        var filterBy = dom.getAttribute("data-filter");
         var filter = "all";
         //console.log(filterBy);
 
@@ -120,10 +132,10 @@
             filter = false;
         }
 
-        showFilteredTasks(filter);
+        self.showFilteredTasks(filter);
     }
 
-    var showFilteredTasks = function showFilteredTasks(filter) {
+    Todo.prototype.showFilteredTasks = function showFilteredTasks(filter) {
         //console.log(filter);
         var filteredTasks = tasks;
 
@@ -134,13 +146,13 @@
             });
         }
 
-        initTask(filteredTasks);
+        this.initTask(filteredTasks);
 
     }
 
-    todoFilter();
 
-    var addTask = function addTask(taskTitle) {
+
+    Todo.prototype.addTask = function addTask(taskTitle) {
         taskTitle = taskTitle.trim();
 
         if(taskTitle) {
@@ -169,18 +181,19 @@
             //console.log(task);
             doc.querySelector("#todo-list").appendChild(taskNode);
 
-            addToggleTaskEvent();
+            this.addToggleTaskEvent();
             return true;
         }
         return false;
     };
 
-    var createTask = function createTask() {
+    Todo.prototype.createTask = function createTask() {
+        var self = this;
         doc.getElementById("todo-form").addEventListener("submit", function(e) {
             e.preventDefault();
             var taskDom =  doc.getElementById("todo-form-input");
             var task = taskDom.value;
-            var isAdded = addTask(task);
+            var isAdded = self.addTask(task);
 
             if(isAdded) {
                 taskDom.value = "";
@@ -189,7 +202,7 @@
         });
     };
 
-    initTask(tasks);
-    createTask();
+    // Export to window
+    window.Todo = Todo;
 
 }(window, document));
