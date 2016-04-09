@@ -35,7 +35,6 @@
         this.todoFilter();
         this.initTask(tasks);
         this.createTask();
-
     }
 
     Todo.prototype.initTask = function initTask(tasks) {
@@ -203,6 +202,6 @@
     };
 
     // Export to window
-    window.Todo = Todo;
+    win.Todo = Todo;
 
 }(window, document));
