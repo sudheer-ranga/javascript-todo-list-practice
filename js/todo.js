@@ -24,6 +24,11 @@
             id: 4,
             title: "Task 4",
             completed: false
+        },
+        {
+            id: 5,
+            title: "Task 5",
+            completed: false
         }
     ];
 
